@@ -1,11 +1,11 @@
-// --- Sockets
+// --- Sockets - https://pixijs.github.io/docs/
 var socket = io();
 //  socket.emit('chat message', $('#m').val());
 socket.on('chat message', function(msg){
   $('#messages').append($('<li>').text(msg));
 });
 
-// --- Graphics
+// --- Graphics - https://pixijs.github.io/docs/
 var stage = new PIXI.Container();
 var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
 requestAnimationFrame(animate);
@@ -34,15 +34,21 @@ function animate() {
     stage.children[i].x += 3;
     if(stage.children[i].x > window.innerWidth) {
       stage.children[i].x = 0;
+      snd.attack = 100;
+      snd.decay = 50000;
+      snd.resonance = 1;
+      snd.cutoff = 0.8;
       snd.note(440 + 50 * Math.floor(12 * Math.random()));
     }
   }
   requestAnimationFrame(animate);
 }
 
-// --- Sound
+// --- Sound - http://www.charlie-roberts.com/gibberish/docs.html
 Gibberish.init();
 Gibberish.Time.export();
 Gibberish.Binops.export();
 
 var snd = new Gibberish.Synth2().connect();
+
+
