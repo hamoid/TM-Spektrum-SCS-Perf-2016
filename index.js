@@ -13,8 +13,10 @@ app.get('/', function(req, res){
 app.use(express.static('public'));
 
 io.on('connection', function(socket){
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+  socket.on('touch', function(msg){
+    //send to all clients
+    //io.emit('chat message', msg);
+    console.log(msg); // msg is the arg sent by the client
   });
 });
 
