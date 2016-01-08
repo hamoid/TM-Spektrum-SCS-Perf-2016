@@ -19,12 +19,17 @@ gfx.endFill();
 
 var texture = gfx.generateTexture(); 
 
-var s = new PIXI.Sprite(texture);
-s.anchor.set(0.5);
-s.x = 50 + (window.innerWidth - 100) * Math.random();
-s.y = 50 + (window.innerHeight - 100) * Math.random();
+for(var i=0; i<2; i++) {
+  var s = new PIXI.Sprite(texture);
+  s.anchor.set(0.5);
+  s.x = 50 + (window.innerWidth - 100) * Math.random();
+  s.y = 50 + (window.innerHeight - 100) * Math.random();
 
-stage.addChild(s);
+  stage.addChild(s);
+}
+
+var nextEvent = (new Date()).getTime() + 1000;
+var ts;
 
 function animate() {
   renderer.render(stage);
@@ -36,15 +41,21 @@ function animate() {
       child.scale = { x:scale, y:scale };
     }
   }
+  if(ts && ts.now() > nextEvent) {
+    var now = ts.now();
+    nextEvent = now + 133 - (now % 133);
+    stage.children[1].x = Math.random() * window.innerWidth;
+    trigger();
+  }
   requestAnimationFrame(animate);
 }
 
 function trigger() {
   // socket
-  socket.emit('touch', 1);
+  //socket.emit('touch', 1);
 
-  snd.attack = 100;
-  snd.decay = 50000;
+  snd.attack = 20;
+  snd.decay = 1000;
   snd.resonance = 1;
   snd.cutoff = 0.8;
   var n = [12, 14, 17][Math.floor(Math.random() * 3)];
@@ -77,3 +88,10 @@ $('body').on('pointerdown', function(event) {
   stage.children[0].scale = { x:5, y:5 };
   trigger();
 });
+
+// create a timesync instance 
+ts = timesync.create({
+  server: '/timesync',
+  interval: 10000
+});
+
