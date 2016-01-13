@@ -5,7 +5,8 @@ var io = require('socket.io')(http);
 var vizSocket;
 var timesyncServer = require('timesync/server');
 
-// The initial code for this app comes from the chat example at
+// The initial code for this app comes from 
+// the chat example at
 // http://socket.io/get-started/chat/
 
 app.get('/', function(req, res){
