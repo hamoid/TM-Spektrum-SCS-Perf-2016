@@ -36,12 +36,38 @@ var APP = function() {
   // samples adjustment on timesync
   this.smppnNext = 0;
 
+  // sync count
+  this.syncCount = 0;
+
+  // show time span
+  this.startTime = 0;
+  this.endTime = 0;
+
+  // SOCKET
+
   this.socket = io();
-  this.socket.on('test msg from server', function(msg){
-    $('#messages').append($('<li>').text(msg));
+
+  this.socket.on('players', function(players){
+    var list = _.map(players, function(obj, id) {
+      return 'id:' + id + ' sync:' + obj.syncCount + ' ip:' + obj.ip;
+    }).join('<br/>');
+    $('#overlay').html(list);
   });
 
+  this.socket.on('setTimeSpan', function(startTime, endTime) {
+    app.startTime = startTime;
+    app.endTime = endTime;
+
+    if(app.startTime) {
+      console.log(app.startTime, app.endTime);
+    }
+  });
+
+  // GFX
+
   this.gfx = new GFX();
+
+  // SOUNDS
 
   this.sounds.push(new Gibberish.Synth2());
   this.soundFx.push(new Gibberish.Vibrato({
@@ -50,18 +76,7 @@ var APP = function() {
     amount:0.2 // try 100
   }).connect());
 
-  this.ts = timesync.create({
-    server: '/timesync',
-    interval: 5000
-  });
-
-  //this.ts.on('change', function(offsetMs) {
-    //console.log('offset:', offsetMs);
-  //})
-
   this.playSound = function() {
-    //this.socket.emit('touch', 1);
-    
     var s = app.sounds[0];
     s.attack = 20;
     s.decay = 1000;
@@ -70,7 +85,7 @@ var APP = function() {
     var note = [12, 14, 19][Math.floor(Math.random() * 3)];
     
     if(Math.random() < 0.5) {
-      s.note(220 * Math.pow(1.059463094359, note));
+      //s.note(220 * Math.pow(1.059463094359, note));
     }
 
     var t = Math.floor(app.ts.now() % app.mspn);
@@ -90,9 +105,24 @@ var APP = function() {
     app.gfx.stage.children[1].x = Math.random() * window.innerWidth;
   }
 
+  // SEQUENCER
+
   this.seq = new Gibberish.Sequencer({
     values:[ this.playSound ], durations:[ this.smppn ]
   }).start()
+  
+  // TIME SYNC'ED WITH THE SERVER
+
+  this.ts = timesync.create({
+    server: '/timesync',
+    interval: 5000
+  });
+
+  this.ts.on('change', function(offsetMs) {
+    app.syncCount++;
+    app.socket.emit('sync', app.syncCount);
+  })
+
 }
 
 // BOOT
