@@ -2,7 +2,10 @@
 
 var GFX = function() {
   this.stage = new PIXI.Container();
-  this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
+  this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {
+    clearBeforeRender: false,
+    preserveDrawingBuffer: true
+  });
 }
 GFX.prototype = {
   constructor: GFX,
@@ -36,7 +39,7 @@ GFX.prototype = {
   },
 
   populateStage: function() {
-    for(var i=0; i<2; i++) {
+    for(var i=0; i<1; i++) {
       var s = new PIXI.Sprite(this.getCircleTexture());
       s.anchor.set(0.5);
       s.x = 50 + (window.innerWidth - 100) * Math.random();
@@ -44,6 +47,11 @@ GFX.prototype = {
 
       this.stage.addChild(s);
     }
+    var cover = new PIXI.Graphics();
+    cover.beginFill(0x000000, 0.03);
+    cover.drawRect(0, 0, this.renderer.width, this.renderer.height);
+    cover.endFill();
+    this.stage.addChild(cover);
   }
 
 }

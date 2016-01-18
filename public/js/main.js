@@ -18,6 +18,9 @@ Gibberish.Binops.export();
 Number.prototype.mod = function(n) {
   return ((this%n)+n)%n;
 }
+Number.prototype.map = function(a, b, c, d) {
+  return c + (d - c) * ((this - a) / (b - a));
+}
 
 var APP = function() {
   this.sounds = [];
@@ -35,6 +38,9 @@ var APP = function() {
   this.smppms = this.smppn / this.mspn;
   // samples adjustment on timesync
   this.smppnNext = 0;
+
+  // user interaction
+  this.pointerDown = false;
 
   // sync count
   this.syncCount = 0;
@@ -77,32 +83,42 @@ var APP = function() {
   }).connect());
 
   this.playSound = function() {
-    var s = app.sounds[0];
-    s.attack = 20;
-    s.decay = 1000;
-    s.resonance = 1;
-    s.cutoff = 0.8;
-    var note = [12, 14, 19][Math.floor(Math.random() * 3)];
+    var now = app.ts.now();
+    var normTime = (now - app.startTime) / (app.endTime - app.startTime);
     
-    if(Math.random() < 0.5) {
-      //s.note(220 * Math.pow(1.059463094359, note));
+    if(app.pointerDown && app.startTime > 0) {
+      // split time in 30, 20 second segments
+      var timeInScore = normTime * 30;
+      var segment = Math.floor(timeInScore);
+      var normSegmentTime = (timeInScore % 1);
+
+      var s = app.sounds[0];
+      s.attack = 20;
+      s.decay = Math.floor(1000 + 10000 * normSegmentTime);
+      s.resonance = 1;
+      s.cutoff = 0.8;
+      var note = [12, 14, 19, 24, 26, 29][Math.floor(1 + Math.random() * ( segment % 6))];
+
+      s.note(220 * Math.pow(1.059463094359, note));
+      app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
+    } else {
+      app.gfx.stage.children[0].x = -20;
     }
 
-    var t = Math.floor(app.ts.now() % app.mspn);
+    var t = Math.floor(now % app.mspn);
     // This approach is not perfect, since the tempo oscillates
     // around the desired target. I could do some averaging in
     // the measurements to know the ideal location in time
     // and then stick to that location without changing the duration.
     // Maybe worth researching in the future.
     if(t < app.mspn / 2) {
-      // if we are a bit late, shorten the loop duration by 5 samples
-      app.seq.durations[0] = app.smppn - 5;
+      // if we are a bit late, shorten the loop duration by N samples
+      app.seq.durations[0] = app.smppn - t/10;
     } else {
-      // if we are a bit early, lengthen the loop duration by 5 samples
-      app.seq.durations[0] = app.smppn + 5;
+      // if we are a bit early, lengthen the loop duration by N samples
+      app.seq.durations[0] = app.smppn + (120-t)/10;
     }
 
-    app.gfx.stage.children[1].x = Math.random() * window.innerWidth;
   }
 
   // SEQUENCER
@@ -136,9 +152,10 @@ app.gfx.populateStage();
 // EVENTS
 // Firefox Linux 64bit issue: 'pointerdown' triggered only once
 $('body').on('pointerdown', function(event) {
-  //app.gfx.stage.children[0].scale = { x:5, y:5 };
-  //app.playSound();
-  app.smppnNext = app.smppn + 100;
+  app.pointerDown = true;
+});
+$('body').on('pointerup pointerout pointerleave', function(event) {
+  app.pointerDown = false;
 });
 
 
