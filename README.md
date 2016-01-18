@@ -1,7 +1,7 @@
 # TM-Spektrum-SCS-Perf-2016
 Local multiuser web based application for musical performance.
 
-## Install instructions
+## To install
 You need [Node.js](https://nodejs.org/) and [Gibberish](https://github.com/charlieroberts/Gibberish) installed.  
 Clone/Copy the project to a local directory.  
 Open the command line and navigate to the project folder.  
