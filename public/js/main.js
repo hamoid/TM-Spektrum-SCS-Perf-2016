@@ -73,9 +73,16 @@ var APP = function() {
 
   this.gfx = new GFX();
 
+  this.gfx.onCtrlUpdate = function(pos) {
+    var s = app.sounds[1];
+    s.frequency = 20 + 500 * pos.x;
+    s.amp = pos.y;
+  }
+
   // SOUNDS
 
   this.sounds.push(new Gibberish.Synth2());
+  this.sounds.push(new Gibberish.Sine2().connect());
   this.soundFx.push(new Gibberish.Vibrato({
     input:this.sounds[0], 
     rate:4, 
@@ -100,6 +107,7 @@ var APP = function() {
       var note = [12, 14, 19, 24, 26, 29][Math.floor(1 + Math.random() * ( segment % 6))];
 
       s.note(220 * Math.pow(1.059463094359, note));
+
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
     } else {
       app.gfx.stage.children[0].x = -20;
