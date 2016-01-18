@@ -3,7 +3,7 @@ Local multiuser web based application for musical performance.
 
 ## To install
 You need [Node.js](https://nodejs.org/) and [Gibberish](https://github.com/charlieroberts/Gibberish) installed.  
-Clone/Copy the project to a local directory.  
+Copy the project to a local directory.  
 Open the command line and navigate to the project folder.  
 Populate the dependencies with  
 ```shell
@@ -18,4 +18,4 @@ Open the browser's JavaScript/Web Console and enter.
 ```shell
 app.socket.emit('start')
 ```   
-You may now close the console and starting having fun clicking your mouse :)
+You may now close the console and start having fun clicking your mouse :)
