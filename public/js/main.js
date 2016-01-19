@@ -250,5 +250,8 @@ $('body').on('pointerdown', function(event) {
 $('body').on('pointerup pointerout pointerleave', function(event) {
   app.pointerDown = false;
 });
-
-
+$('body').on('keypress', function(event) {
+  if(event.which == 115) {
+    app.socket.emit('start');
+  }
+});
