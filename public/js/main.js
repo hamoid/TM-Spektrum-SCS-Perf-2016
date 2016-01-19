@@ -131,7 +131,7 @@ var APP = function() {
     var list = _.map(players, function(obj, id) {
       return 'id:' + id + ' sync:' + obj.syncCount + ' ip:' + obj.ip;
     }).join('<br/>');
-    $('#overlay').html(list);
+    $('#overlay').html('<b>participants</b><br/>' + list);
   });
 
   this.socket.on('setTimeSpan', function(startTime, endTime) {

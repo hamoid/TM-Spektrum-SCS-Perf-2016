@@ -72,7 +72,7 @@ GFX.prototype = {
   populateStage: function() {
     var width = this.renderer.width;
     var height = this.renderer.height;
-    var margin = 50;
+    var margin = 100;
     var timelineWidth = width - margin * 2;
     var timelineHeight = 100;
     var segmentWidth = timelineWidth / app.segmentCount;
