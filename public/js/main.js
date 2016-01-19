@@ -23,6 +23,7 @@ Number.prototype.map = function(a, b, c, d) {
   return c + (d - c) * ((this - a) / (b - a));
 }
 
+// 0
 var RhythmicDecayAttack = function () {
     var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
@@ -34,6 +35,7 @@ var RhythmicDecayAttack = function () {
     synth.note(220 * Math.pow(1.059463094359, note));
 };
 
+// 1
 var RhythmicDetuneAttack = function () {
     var synth = app.sounds.poly;
     synth.attack = 22500 * app.pos.y;
@@ -44,6 +46,7 @@ var RhythmicDetuneAttack = function () {
     synth.note(220 * Math.pow(1.059463094359, note) + app.pos.x * 50);
 };
 
+// 2
 var RhythmicFixedRandom = function () {
     var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
@@ -54,6 +57,7 @@ var RhythmicFixedRandom = function () {
     synth.note(220 * Math.pow(1.059463094359, note));
 };
 
+// 3
 var RhythmicFixedRandomMorph = function () {
     var synth = app.sounds.poly;
     synth.decay = 200;
@@ -132,18 +136,17 @@ var RhythmicRandomNote = function () {
 };
 
 // nr. 6
-// move left & right cutoff, up & down resonance
-var RhythmicRandomNoteCutOff = function () {
-    var id = app.id % 2;
+// move from left to right
+var RhythmicRandomNoteRing = function () {
+    var id = app.id % 3;
     var synth = app.sounds.sawSynth;
 
     synth.decay = 20000;
     synth.attack = 2000;
     synth.resonance = 1;
 
-    console.log(app.pos.x)
-    app.soundFx.filter.cutoff = app.pos.x;
-    app.soundFx.filter.resonance = 4 * app.pos.y;
+    app.soundFx.ring.frequency = app.pos.x * 500 + 200;
+    app.soundFx.ring.mix = app.pos.x;
     //synth.amp = 0.5;
 
     if (id == 0)
@@ -152,12 +155,84 @@ var RhythmicRandomNoteCutOff = function () {
       var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
       synth.note(110 * Math.pow(1.059463094359, note));
     }
-    else
+    else if (id == 1)
     {
       var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
       synth.note(124.3 * Math.pow(1.059463094359, note));
     }
+    else
+    {
+      var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
+      synth.note(146.3 * Math.pow(1.059463094359, note));
+
+    }
 };
+
+// nr. 7
+// move from left to right, back and forth
+var RhythmicFixedRandomNoteRing = function () {
+    var id = app.id % 3;
+    var synth = app.sounds.sawSynth;
+
+    synth.decay = 20000;
+    synth.attack = 2000;
+    synth.resonance = 1;
+
+    app.soundFx.ring.frequency = app.pos.x * 500 + 200;
+    app.soundFx.ring.mix = app.pos.x;
+    //synth.amp = 0.5;
+
+    var note = [12, 14, 19, 33, 30, 31][app.id];
+    if (id == 0)
+    {
+      synth.note(110 * Math.pow(1.059463094359, note));
+    }
+    else if (id == 1)
+    {
+      synth.note(124.3 * Math.pow(1.059463094359, note));
+    }
+    else
+    {
+      synth.note(146.3 * Math.pow(1.059463094359, note));
+
+    }
+};
+
+
+
+// nr. 8
+// move from bottom-left to upper-right, and back
+var RhythmicFixedRandomNoteRingSimple = function () {
+    var id = app.id % 3;
+    var synth = app.sounds.sawSynth;
+
+    synth.decay = 20000;
+    synth.attack = 2000;
+    synth.resonance = 1;
+
+    app.soundFx.ring.frequency = app.pos.x * 500 + 200;
+    app.soundFx.ring.mix = 1;
+    //synth.amp = 0.5;
+
+    var note = [12, 14, 19, 33, 30, 31][app.id];
+    synth.note(110 * Math.pow(1.059463094359, note) + app.pos.y * 10);
+};
+
+// nr. 9
+// move casually
+var RhythmicTwoSynthRandomNoteRing = function () {
+    var id = app.id % 3;
+    var synth = (app.id % 2) ? app.sounds.sawSynth : app.sounds.poly;
+
+    synth.decay = 20000;
+    synth.attack = app.pos.x * 2000;
+    synth.resonance = 1;
+
+    app.soundFx.ring.mix = 0.5;
+    var note = [12, 14, 19, 33, 30, 31][Math.floor((Math.random() * app.id) %6)];
+    synth.note(110 * Math.pow(1.059463094359, note) + app.pos.y * 10);
+};
+
 
 var APP = function() {
   this.sounds = {};
@@ -170,10 +245,10 @@ var APP = function() {
   this.segments.push(RhythmicFixedRandomMorph);
   this.segments.push(RhythmicSawNoise);
   this.segments.push(RhythmicRandomNote);
-  this.segments.push(RhythmicRandomNoteCutOff);
-  // this.segments.push();
-  // this.segments.push();
-  // this.segments.push();
+  this.segments.push(RhythmicRandomNoteRing);
+  this.segments.push(RhythmicFixedRandomNoteRing);
+  this.segments.push(RhythmicFixedRandomNoteRingSimple);
+  this.segments.push(RhythmicTwoSynthRandomNoteRing);
 
   this.id = Math.floor(Math.random() * 6);
 
@@ -269,8 +344,9 @@ var APP = function() {
 
   // soundFx[1]
 
-  this.soundFx.filter = new Gibberish.Filter24({input:this.sounds.sawSynth, cutoff:.2, resonance:4});
-  this.soundFx.filter.isLowPass = true;
+  this.soundFx.ring = new Gibberish.RingModulation({ input:this.sounds.sawSynth, frequency:1000, amp:1., mix:0.0 });
+  this.soundFx.ring.connect();
+
 
   this.playSound = function() {
     var now = app.ts.now();
@@ -283,7 +359,7 @@ var APP = function() {
 
     if(app.pointerDown && app.startTime > 0) {
 
-      app.segments[6]();
+      app.segments[9]();
 
       // show dot somewhere
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
