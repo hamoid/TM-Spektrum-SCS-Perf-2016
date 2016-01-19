@@ -85,7 +85,7 @@ GFX.prototype = {
       var s = new PIXI.Sprite(this.getCircleTexture());
       s.anchor.set(0.5);
       s.x = 0;
-      s.y = 100;
+      s.y = 600;
       this.stage.addChild(s);
     }
 
