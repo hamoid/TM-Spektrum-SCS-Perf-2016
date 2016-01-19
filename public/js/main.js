@@ -24,6 +24,7 @@ Number.prototype.map = function(a, b, c, d) {
 }
 
 // 0
+// move from top-left corner to bottom-right corner
 var RhythmicDecayAttack = function () {
     var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
@@ -36,6 +37,7 @@ var RhythmicDecayAttack = function () {
 };
 
 // 1
+// move casually
 var RhythmicDetuneAttack = function () {
     var synth = app.sounds.poly;
     synth.attack = 22500 * app.pos.y;
@@ -47,6 +49,7 @@ var RhythmicDetuneAttack = function () {
 };
 
 // 2
+// press and move casually for 2 seconds, occassionally
 var RhythmicFixedRandom = function () {
     var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
@@ -58,6 +61,7 @@ var RhythmicFixedRandom = function () {
 };
 
 // 3
+// move left and right
 var RhythmicFixedRandomMorph = function () {
     var synth = app.sounds.poly;
     synth.decay = 200;
@@ -78,6 +82,7 @@ var RhythmicFixedRandomMorph = function () {
 };
 
 // nr. 4
+// move up and down, then left and right. release occassionally
 var RhythmicSawNoise = function () {
   //x : amp, y : attack,
     var id = app.id % 3;
@@ -235,8 +240,20 @@ var RhythmicTwoSynthRandomNoteRing = function () {
 var APP = function() {
   this.sounds = {};
   this.soundFx = {};
+  this.texts = [];
 
   this.segments = [];
+  this.texts("move from top-left corner to bottom-right corner");
+  this.texts("move casually");
+  this.texts("press and move casually for 2 seconds, occassionally");
+  this.texts("move left and right");
+  this.texts("move up and down, then left and right. release occassionally");
+  this.texts("move to right to increase the probability of triggering the note, and vice versa");
+  this.texts("move from left to right");
+  this.texts("move from left to right, back and forth");
+  this.texts("move from bottom-left to upper-right, and back");
+  this.texts("move casually");
+
   this.segments.push(RhythmicDecayAttack);
   this.segments.push(RhythmicDetuneAttack);
   this.segments.push(RhythmicFixedRandom);
