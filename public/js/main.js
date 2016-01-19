@@ -5,7 +5,7 @@
   Using PEP for touch compatibility events
   between desktop and mobile.
     pointermove    pointerdown    pointerup
-    pointerover    pointerout     
+    pointerover    pointerout
     pointerenter   pointerleave   pointercancel
 */
 
@@ -13,6 +13,7 @@
 Gibberish.init();
 Gibberish.Time.export();
 Gibberish.Binops.export();
+
 
 // Modulo that works with negative numbers
 Number.prototype.mod = function(n) {
@@ -22,9 +23,79 @@ Number.prototype.map = function(a, b, c, d) {
   return c + (d - c) * ((this - a) / (b - a));
 }
 
+var RhythmicDecayAttack = function () {
+    var synth = app.sounds[0];
+    synth.decay = 22500 * app.pos.x;
+    synth.attack = 22500 * app.pos.y;
+
+    synth.resonance = 1;
+    synth.cutoff = 0.8;
+
+    var note = [12, 14, 19, 24, 26, 29][Math.floor(Math.random() * 6)];
+    synth.note(220 * Math.pow(1.059463094359, note));
+};
+
+var RhythmicDetuneAttack = function () {
+    var synth = app.sounds[0];
+    synth.attack = 22500 * app.pos.y;
+    synth.decay = 200;
+    synth.resonance = 1;
+    synth.cutoff = 0.8;
+
+    var note = [12, 14, 19, 24, 26, 29][Math.floor(Math.random() * 6)];
+    synth.note(220 * Math.pow(1.059463094359, note) + app.pos.x * 50);
+};
+
+var RhythmicFixedRandom = function () {
+    var synth = app.sounds[0];
+    synth.decay = 22500 * app.pos.x;
+    synth.attack = 10000 * app.pos.y;
+    synth.resonance = 1;
+    synth.cutoff = 0.8;
+
+    var note = [12, 14, 19, 24, 26, 29][app.id];
+    synth.note(220 * Math.pow(1.059463094359, note));
+};
+
+var RhythmicFixedRandomMorph = function () {
+    var synth = app.sounds[0];
+    synth.decay = 200;
+    synth.attack = 10000 * app.pos.y;
+    synth.resonance = 1;
+    synth.cutoff = 0.8;
+    synth.amp = 1. - app.pos.x;
+
+    var saw = app.sounds[2];
+    saw.decay = 200;
+    saw.attack = 10000 * app.pos.y;
+    saw.resonance = 1;
+    saw.cutoff = 0.8;
+    saw.amp = app.pos.x;
+
+    var note = [12, 14, 19, 24, 26, 29][app.id];
+    synth.note(220 * Math.pow(1.059463094359, note));
+    saw.note(220 * Math.pow(1.059463094359, note));
+};
+
 var APP = function() {
   this.sounds = [];
   this.soundFx = [];
+
+  this.segments = [];
+  this.segments.push(RhythmicDecayAttack);
+  this.segments.push(RhythmicDetuneAttack);
+  this.segments.push(RhythmicFixedRandom);
+  this.segments.push(RhythmicFixedRandomMorph);
+  // this.segments.push();
+  // this.segments.push();
+  // this.segments.push();
+  // this.segments.push();
+  // this.segments.push();
+  // this.segments.push();
+
+  this.id = Math.floor(Math.random() * 6);
+
+  this.pos = {x:0, y:0};
 
   // beats per minute
   this.bpm = 125;
@@ -74,39 +145,44 @@ var APP = function() {
   this.gfx = new GFX();
 
   this.gfx.onCtrlUpdate = function(pos) {
-    var s = app.sounds[1];
-    s.frequency = 20 + 500 * pos.x;
-    s.amp = pos.y;
+    // var s = app.sounds[1];
+    // app.segments[0](app.sounds[0], pos);
+    // s.frequency = 20 + 500 * pos.x;
+    // s.amp = pos.y;
+    app.pos.x = pos.x;
+    app.pos.y = pos.y;
   }
 
   // SOUNDS
 
-  this.sounds.push(new Gibberish.Synth2());
-  this.sounds.push(new Gibberish.Sine2().connect());
+  this.sounds.push(new Gibberish.PolySynth({ attack:88200, decay:88200, maxVoices:10 }).connect());
+  this.sounds.push(new Gibberish.Sine( 440, Add( .5 * this.pos.x)).connect());
+
+  a = new Gibberish.Synth({ attack:44, decay:44100 }).connect();
+  a.waveform = "Saw";
+
+  this.sounds.push(a);
+
+  this.sounds.push(new Gibberish.Noise(.0).connect());
+
+  //this.sounds.push(new Gibberish.Sine2().connect());
   this.soundFx.push(new Gibberish.Vibrato({
-    input:this.sounds[0], 
-    rate:4, 
+    input:this.sounds[0],
+    rate:4,
     amount:0.2 // try 100
   }).connect());
 
   this.playSound = function() {
     var now = app.ts.now();
     var normTime = (now - app.startTime) / (app.endTime - app.startTime);
-    
-    if(app.pointerDown && app.startTime > 0) {
+
+    if(app.pointerDown ) {
       // split time in 30, 20 second segments
       var timeInScore = normTime * 30;
       var segment = Math.floor(timeInScore);
       var normSegmentTime = (timeInScore % 1);
 
-      var s = app.sounds[0];
-      s.attack = 20;
-      s.decay = Math.floor(1000 + 10000 * normSegmentTime);
-      s.resonance = 1;
-      s.cutoff = 0.8;
-      var note = [12, 14, 19, 24, 26, 29][Math.floor(1 + Math.random() * ( segment % 6))];
-
-      s.note(220 * Math.pow(1.059463094359, note));
+      app.segments[3]();
 
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
     } else {
@@ -134,7 +210,7 @@ var APP = function() {
   this.seq = new Gibberish.Sequencer({
     values:[ this.playSound ], durations:[ this.smppn ]
   }).start()
-  
+
   // TIME SYNC'ED WITH THE SERVER
 
   this.ts = timesync.create({
