@@ -93,12 +93,10 @@ var RhythmicSawNoise = function () {
         synth.note(220 * Math.pow(1.059463094359, note));
       break;
       case 2:
-        var noise = app.sounds.noise;
-        noise.run();
+        app.sounds.noiseAdsr.run();
       break;
       default:
-        var noise = app.sounds.noise;
-        noise.run();
+        app.sounds.noiseAdsr.run();
     }
 };
 
@@ -197,6 +195,12 @@ var APP = function() {
 
   // user interaction
   this.pointerDown = false;
+  this.onPointerDown = function() {
+    app.pointerDown = true;
+  }
+  this.onPointerUp = function() {
+    app.pointerDown = false;
+  }
 
   // sync count
   this.syncCount = 0;
@@ -255,11 +259,14 @@ var APP = function() {
   this.sounds.sawSynth.waveform = "Saw";
 
   //sound 3
-  adsr = new Gibberish.ADSR(200, 220, 0, 2050, 1, .35, false);
-  synth_test = new Gibberish.Noise(Mul(.5, adsr)).connect();
-  //this.sounds.push(new Gibberish.Noise(Mul(.5, adsr)).connect());
-  this.sounds.noise = adsr;
+  this.sounds.noiseAdsr = new Gibberish.ADSR(200, 220, 0, 2050, 1, .35, false);
+  this.sounds.noise = new Gibberish.Noise(Mul(.5, this.sounds.noiseAdsr)).connect();
 
+  //sound 4 - (attack, decay, sustain, release,   attackLevel, sustainLevel, requireReleaseTrigger)
+  this.sounds.sinAdsr = new Gibberish.ADSR(200, 220, 0, 2050,  1, 1, true);
+  this.sounds.sinAbe = new Gibberish.Sine(440, this.sounds.sinAdsr).connect();
+
+  //fx 1
   this.soundFx.vibrato = new Gibberish.Vibrato({
     input:this.sounds.poly,
     rate:4,
@@ -267,10 +274,11 @@ var APP = function() {
   });
   this.soundFx.vibrato.connect();
 
-  // soundFx[1]
-
+  //fx 2
   this.soundFx.filter = new Gibberish.Filter24({input:this.sounds.sawSynth, cutoff:.2, resonance:4});
   this.soundFx.filter.isLowPass = true;
+
+  // ***
 
   this.playSound = function() {
     var now = app.ts.now();
@@ -281,9 +289,10 @@ var APP = function() {
     var segment = Math.floor(timeInScore);
     var normSegmentTime = (timeInScore % 1);
 
-    if(app.pointerDown && app.startTime > 0) {
+    app.currentSegmentFunc = app.segments[segment % app.segments.length];
 
-      app.segments[6]();
+    if(app.pointerDown && normTime > 0 && normTime < 1) {
+      app.currentSegmentFunc();
 
       // show dot somewhere
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
@@ -339,12 +348,8 @@ app.gfx.populateStage();
 
 // EVENTS
 // Firefox Linux 64bit issue: 'pointerdown' triggered only once
-$('body').on('pointerdown', function(event) {
-  app.pointerDown = true;
-});
-$('body').on('pointerup pointerout pointerleave', function(event) {
-  app.pointerDown = false;
-});
+$('body').on('pointerdown', app.onPointerDown);
+$('body').on('pointerup pointerout pointerleave', app.onPointerUp);
 $('body').on('keypress', function(event) {
   if(event.which == 115) {
     app.socket.emit('start');

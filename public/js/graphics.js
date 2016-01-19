@@ -50,6 +50,10 @@ GFX.prototype = {
   },
 
   updateProgress: function(segment, normTime) {
+    if(normTime > 1) {
+      segment *= 10;
+      normTime *= 10;
+    }
     var tl = app.gfx.timelineGfx;
     app.gfx.segmentGfx.x = tl.x + app.gfx.segmentGfx.width * segment;
     app.gfx.timeGfx.x = tl.x + normTime * tl.width;
