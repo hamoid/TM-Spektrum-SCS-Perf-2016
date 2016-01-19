@@ -26,6 +26,7 @@ var GFX = function() {
     }
   }, 5);
 
+  this.timeGfx = null;
   this.segmentGfx = null;
   this.timelineGfx = null;
 }
@@ -48,8 +49,10 @@ GFX.prototype = {
     requestAnimationFrame(self.draw);
   },
 
-  updateProgress: function(segment, normSegmentTime) {
-    app.gfx.segmentGfx.x = app.gfx.timelineGfx.x + app.gfx.segmentGfx.width * segment;
+  updateProgress: function(segment, normTime) {
+    var tl = app.gfx.timelineGfx;
+    app.gfx.segmentGfx.x = tl.x + app.gfx.segmentGfx.width * segment;
+    app.gfx.timeGfx.x = tl.x + normTime * tl.width;
   },
 
   getCircleTexture: function() {
@@ -69,7 +72,7 @@ GFX.prototype = {
   populateStage: function() {
     var width = this.renderer.width;
     var height = this.renderer.height;
-    var margin = 50;
+    var margin = 100;
     var timelineWidth = width - margin * 2;
     var timelineHeight = 100;
     var segmentWidth = timelineWidth / app.segmentCount;
@@ -88,6 +91,13 @@ GFX.prototype = {
     this.segmentGfx.drawRect(0, 0, segmentWidth, timelineHeight);
     this.segmentGfx.endFill();
     this.stage.addChild(this.segmentGfx);
+
+    // current time indicator
+    this.timeGfx = new PIXI.Graphics();
+    this.timeGfx.beginFill(0xFFFFFF, 0.5);
+    this.timeGfx.drawRect(0, 0, 2, 20);
+    this.timeGfx.endFill();
+    this.stage.addChild(this.timeGfx);
 
     // fade out effect
     var cover = new PIXI.Graphics();
@@ -122,8 +132,13 @@ GFX.prototype = {
     }
     this.stage.addChild(this.timelineGfx);
 
+    // move segmentGfx
     this.segmentGfx.x = this.timelineGfx.x;
     this.segmentGfx.y = this.timelineGfx.y;
+
+    // move timeGfx
+    this.timeGfx.x = this.timelineGfx.x;
+    this.timeGfx.y = this.timelineGfx.y - 25;
   }
 
 }

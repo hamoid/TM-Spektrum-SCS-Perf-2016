@@ -13,11 +13,24 @@ body {
   position: absolute;
   z-index: 100;
   left: 0px;
-  top: 0px;
+  top: 50px;
   width: 100%;
   color: #888;
   font-family: monospace;
   font-size: large;
-  padding: 50px;
+  text-align: right;
+  padding: 50px 100px;
   pointer-events:none;
+}
+#instructions {
+  position: absolute;
+  z-index: 101;
+  left: 0px;
+  top: 600px;
+  width: 100%;
+  color: #888;
+  font-family: monospace;
+  font-size: large;
+  text-align: center;
+  pointer-events:none; 
 }

@@ -213,7 +213,7 @@ var APP = function() {
     var list = _.map(players, function(obj, id) {
       return 'id:' + id + ' sync:' + obj.syncCount + ' ip:' + obj.ip;
     }).join('<br/>');
-    $('#overlay').html(list);
+    $('#overlay').html('<b>participants</b><br/>' + list);
   });
 
   this.socket.on('setTimeSpan', function(startTime, endTime) {
@@ -291,7 +291,7 @@ var APP = function() {
       // hide dot
       app.gfx.stage.children[0].x = -20;
     }
-    app.gfx.updateProgress(segment, normSegmentTime);
+    app.gfx.updateProgress(segment, normTime);
 
     var t = Math.floor(now % app.mspn);
     // This approach is not perfect, since the tempo oscillates
@@ -345,5 +345,8 @@ $('body').on('pointerdown', function(event) {
 $('body').on('pointerup pointerout pointerleave', function(event) {
   app.pointerDown = false;
 });
-
-
+$('body').on('keypress', function(event) {
+  if(event.which == 115) {
+    app.socket.emit('start');
+  }
+});

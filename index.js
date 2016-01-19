@@ -36,7 +36,7 @@ io.on('connection', function(socket){
 
   // Start the show
   socket.on('start', function() {
-    if(startTime == 0) {
+    if(remoteIP == '::1' && startTime == 0) {
       var performanceDuration = 10; // minutes
       startTime = (new Date()).getTime();
       endTime = startTime + performanceDuration * 60 * 1000;

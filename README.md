@@ -1,8 +1,8 @@
 # TM-Spektrum-SCS-Perf-2016
-Local multiuser web based application for musical performance.
+Local collaborative web based musical performance app.
 
 ## To install
-You need [Node.js](https://nodejs.org/) and [Gibberish](https://github.com/charlieroberts/Gibberish) installed.  
+You need [Node.js](https://nodejs.org/) installed.  
 Copy the project to a local directory.  
 Open the command line and navigate to the project folder.  
 Populate the dependencies with  
@@ -13,9 +13,7 @@ then run
 ```shell
 node index.js
 ```
-Visit [http://localhost:3000](http://localhost:3000) on Chrome or Firefox.  
-Open the browser's JavaScript/Web Console and enter.  
-```shell
-app.socket.emit('start')
-```   
+Visit [http://localhost:3000](http://localhost:3000) on Chrome, Chromium (recommended for audio) or Firefox (recommended for every day browsing).
+Press the 's' key to start the 10 minute performance.
+
 You may now close the console and start having fun :)
