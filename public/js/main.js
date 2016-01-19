@@ -97,6 +97,9 @@ var APP = function() {
 
   this.pos = {x:0, y:0};
 
+  // split the performance in segments, each with unique sound
+  this.segmentCount = 30;
+
   // beats per minute
   this.bpm = 125;
   // notes per secord
@@ -142,15 +145,17 @@ var APP = function() {
 
   // GFX
 
-  this.gfx = new GFX();
+  this.gfx = new GFX(this.segmentCount);
 
   this.gfx.onCtrlUpdate = function(pos) {
-    // var s = app.sounds[1];
-    // app.segments[0](app.sounds[0], pos);
-    // s.frequency = 20 + 500 * pos.x;
-    // s.amp = pos.y;
     app.pos.x = pos.x;
     app.pos.y = pos.y;
+
+    // test sinewaves
+    var s = app.sounds[1];
+    s.frequency = 20 + 500 * pos.x;
+    s.amp = 1 - pos.y;
+
   }
 
   // SOUNDS
@@ -176,18 +181,22 @@ var APP = function() {
     var now = app.ts.now();
     var normTime = (now - app.startTime) / (app.endTime - app.startTime);
 
-    if(app.pointerDown ) {
-      // split time in 30, 20 second segments
-      var timeInScore = normTime * 30;
-      var segment = Math.floor(timeInScore);
-      var normSegmentTime = (timeInScore % 1);
+    // split full duration in smaller segments
+    var timeInScore = normTime * app.segmentCount;
+    var segment = Math.floor(timeInScore);
+    var normSegmentTime = (timeInScore % 1);
+
+    if(app.pointerDown && app.startTime > 0) {
 
       app.segments[3]();
 
+      // show dot somewhere
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
     } else {
+      // hide dot
       app.gfx.stage.children[0].x = -20;
     }
+    app.gfx.updateProgress(segment, normSegmentTime);
 
     var t = Math.floor(now % app.mspn);
     // This approach is not perfect, since the tempo oscillates
