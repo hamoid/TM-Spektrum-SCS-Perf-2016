@@ -1,4 +1,4 @@
-// --- Sockets - https://pixijs.github.io/docs/
+/// --- Sockets - https://pixijs.github.io/docs/
 // --- Sound - http://www.charlie-roberts.com/gibberish/docs.html
 
 /*
@@ -242,17 +242,19 @@ var APP = function() {
   this.soundFx = {};
   this.texts = [];
 
+  this.texts = [];
   this.segments = [];
-  this.texts("move from top-left corner to bottom-right corner");
-  this.texts("move casually");
-  this.texts("press and move casually for 2 seconds, occassionally");
-  this.texts("move left and right");
-  this.texts("move up and down, then left and right. release occassionally");
-  this.texts("move to right to increase the probability of triggering the note, and vice versa");
-  this.texts("move from left to right");
-  this.texts("move from left to right, back and forth");
-  this.texts("move from bottom-left to upper-right, and back");
-  this.texts("move casually");
+
+  this.texts.push("move from top-left corner to bottom-right corner");
+  this.texts.push("move casually");
+  this.texts.push("press and move casually for 2 seconds, occassionally");
+  this.texts.push("move left and right");
+  this.texts.push("move up and down, then left and right. release occassionally");
+  this.texts.push("move to right to increase the probability of triggering the note, and vice versa");
+  this.texts.push("move from left to right");
+  this.texts.push("move from left to right, back and forth");
+  this.texts.push("move from bottom-left to upper-right, and back");
+  this.texts.push("move casually");
 
   this.segments.push(RhythmicDecayAttack);
   this.segments.push(RhythmicDetuneAttack);
@@ -291,17 +293,25 @@ var APP = function() {
   this.pointerDown = false;
   this.onPointerDown = function() {
     app.pointerDown = true;
+    //if(app.segment == 0) {
+    //  app.sounds.sinAdsr.run();
+    //}
   }
   this.onPointerUp = function() {
     app.pointerDown = false;
+    //app.sounds.sinAdsr.stop();
   }
 
   // sync count
   this.syncCount = 0;
 
-  // show time span
+  // time
   this.startTime = 0;
   this.endTime = 0;
+  this.normTime = null;
+  this.segment = null;
+  this.segmentPrev = null;
+  this.normSegmentTime = null;
 
   // SOCKET
 
@@ -335,6 +345,7 @@ var APP = function() {
     //var s = app.sounds.sine;
     //s.frequency = 20 + 500 * pos.x;
     //s.amp = 0;//1 - pos.y;
+    // here we should update playing sound
 
   }
 
@@ -357,9 +368,9 @@ var APP = function() {
   this.sounds.noise = new Gibberish.Noise(Mul(.5, this.sounds.noiseAdsr)).connect();
 
   //sound 4 - (attack, decay, sustain, release,   attackLevel, sustainLevel, requireReleaseTrigger)
-  this.sounds.sinAdsr = new Gibberish.ADSR(200, 220, 0, 2050,  1, 1, true);
-  this.sounds.sinAbe = new Gibberish.Sine(440, this.sounds.sinAdsr).connect();
-  this.sounds.sinAbe.amp = 0;
+  //this.sounds.sinAdsr = new Gibberish.ADSR(200, 220, 0, 2050,  1, 1, true);
+  //this.sounds.sinAbe = new Gibberish.Sine2(440, Mul(0.5, this.sounds.sinAdsr)).connect();
+  // this.sounds.sinAbe.amp = 0;
 
   //fx 1
   this.soundFx.vibrato = new Gibberish.Vibrato({
@@ -377,16 +388,21 @@ var APP = function() {
 
   this.playSound = function() {
     var now = app.ts.now();
-    var normTime = (now - app.startTime) / (app.endTime - app.startTime);
+    app.normTime = (now - app.startTime) / (app.endTime - app.startTime);
 
     // split full duration in smaller segments
-    var timeInScore = normTime * app.segmentCount;
-    var segment = Math.floor(timeInScore);
-    var normSegmentTime = (timeInScore % 1);
+    var timeInScore = app.normTime * app.segmentCount;
+    app.segment = Math.floor(timeInScore);
+    app.normSegmentTime = (timeInScore % 1);
 
-    app.currentSegmentFunc = app.segments[segment % app.segments.length];
+    var currSegment = app.segment % app.segments.length;
+    app.currentSegmentFunc = app.segments[currSegment];
+    if(app.segment != app.segmentPrev) {
+      app.segmentPrev = app.segment;
+      $('#instructions').text(app.texts[currSegment]);
+    }
 
-    if(app.pointerDown && normTime > 0 && normTime < 1) {
+    if(app.pointerDown && app.normTime > 0 && app.normTime < 1) {
       app.currentSegmentFunc();
 
       // show dot somewhere
@@ -395,7 +411,7 @@ var APP = function() {
       // hide dot
       app.gfx.stage.children[0].x = -20;
     }
-    app.gfx.updateProgress(segment, normTime);
+    app.gfx.updateProgress(app.segment, app.normTime);
 
     var t = Math.floor(now % app.mspn);
     // This approach is not perfect, since the tempo oscillates
@@ -440,6 +456,8 @@ document.body.appendChild(app.gfx.renderer.view);
 requestAnimationFrame(app.gfx.draw);
 app.gfx.draw();
 app.gfx.populateStage();
+
+$('#instructions').text('please wait for the show to begin');
 
 // EVENTS
 // Firefox Linux 64bit issue: 'pointerdown' triggered only once
