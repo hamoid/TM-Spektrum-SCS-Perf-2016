@@ -172,6 +172,8 @@ var APP = function() {
   // this.segments.push();
   // this.segments.push();
   // this.segments.push();
+  
+  this.currentSegmentFunc = function() {};
 
   this.id = Math.floor(Math.random() * 6);
 
@@ -238,9 +240,9 @@ var APP = function() {
     app.pos.y = pos.y;
 
     // test sinewaves
-    var s = app.sounds.sine;
-    s.frequency = 20 + 500 * pos.x;
-    s.amp = 0;//1 - pos.y;
+    //var s = app.sounds.sine;
+    //s.frequency = 20 + 500 * pos.x;
+    //s.amp = 0;//1 - pos.y;
 
   }
 
@@ -251,8 +253,8 @@ var APP = function() {
   this.sounds.poly.connect();
 
   //sound 1
-  this.sounds.sine = new Gibberish.Sine( 440, Add( .5 * this.pos.x));
-  this.sounds.sine.connect();
+  //this.sounds.sine = new Gibberish.Sine( 440, Add( .5 * this.pos.x));
+  //this.sounds.sine.connect();
 
   //sound 2
   this.sounds.sawSynth = new Gibberish.Synth({ attack:44, decay:44100 }).connect();
@@ -265,6 +267,7 @@ var APP = function() {
   //sound 4 - (attack, decay, sustain, release,   attackLevel, sustainLevel, requireReleaseTrigger)
   this.sounds.sinAdsr = new Gibberish.ADSR(200, 220, 0, 2050,  1, 1, true);
   this.sounds.sinAbe = new Gibberish.Sine(440, this.sounds.sinAdsr).connect();
+  this.sounds.sinAbe.amp = 0;
 
   //fx 1
   this.soundFx.vibrato = new Gibberish.Vibrato({
