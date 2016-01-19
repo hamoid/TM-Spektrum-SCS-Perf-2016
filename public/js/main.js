@@ -196,7 +196,7 @@ var APP = function() {
       // hide dot
       app.gfx.stage.children[0].x = -20;
     }
-    app.gfx.updateProgress(segment, normSegmentTime);
+    app.gfx.updateProgress(segment, normTime);
 
     var t = Math.floor(now % app.mspn);
     // This approach is not perfect, since the tempo oscillates
