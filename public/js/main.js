@@ -48,6 +48,12 @@ var APP = function() {
   // show time span
   this.startTime = 0;
   this.endTime = 0;
+  
+  // Store pointer y coordinate upon pointerDown
+  this.pointerDownClientY = 0;
+  
+  // Filter
+  this.cutOffFilter = 0;
 
   // SOCKET
 
@@ -96,7 +102,7 @@ var APP = function() {
       s.attack = 20;
       s.decay = Math.floor(1000 + 10000 * normSegmentTime);
       s.resonance = 1;
-      s.cutoff = 0.8;
+      s.cutoff = app.cutOffFilter;
       var note = [12, 14, 19, 24, 26, 29][Math.floor(1 + Math.random() * ( segment % 6))];
 
       s.note(220 * Math.pow(1.059463094359, note));
@@ -153,9 +159,28 @@ app.gfx.populateStage();
 // Firefox Linux 64bit issue: 'pointerdown' triggered only once
 $('body').on('pointerdown', function(event) {
   app.pointerDown = true;
+  // save original y coordinate for pointer down position
+  app.pointerDownClientY = event.clientY; 
+  // restore default cutoff settings
+  app.cutOffFilter = 0.8;
 });
+
 $('body').on('pointerup pointerout pointerleave', function(event) {
   app.pointerDown = false;
+});
+
+$('body').on('pointermove', function(event) {
+
+	// Control a low pass filter by moving the pointer below the original click/tap position (when sound is playing)
+	// Range goes from original vertical coordinate of click/tap to bottom of page
+	if(app.pointerDown && app.startTime > 0 && event.clientY >= app.pointerDownClientY){
+	
+		var filterRange = window.innerHeight - app.pointerDownClientY;
+		var pointerDownOffset = event.clientY - app.pointerDownClientY;
+		// Change value accordingly
+		app.cutOffFilter = 0.80 - 0.7*(pointerDownOffset/filterRange);
+	}
+        
 });
 
 
