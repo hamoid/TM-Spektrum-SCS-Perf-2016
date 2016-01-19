@@ -24,48 +24,44 @@ Number.prototype.map = function(a, b, c, d) {
 }
 
 var RhythmicDecayAttack = function () {
-    var synth = app.sounds[0];
+    var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
     synth.attack = 22500 * app.pos.y;
 
     synth.resonance = 1;
-    synth.cutoff = 0.8;
 
     var note = [12, 14, 19, 24, 26, 29][Math.floor(Math.random() * 6)];
     synth.note(220 * Math.pow(1.059463094359, note));
 };
 
 var RhythmicDetuneAttack = function () {
-    var synth = app.sounds[0];
+    var synth = app.sounds.poly;
     synth.attack = 22500 * app.pos.y;
     synth.decay = 200;
     synth.resonance = 1;
-    synth.cutoff = 0.8;
 
     var note = [12, 14, 19, 24, 26, 29][Math.floor(Math.random() * 6)];
     synth.note(220 * Math.pow(1.059463094359, note) + app.pos.x * 50);
 };
 
 var RhythmicFixedRandom = function () {
-    var synth = app.sounds[0];
+    var synth = app.sounds.poly;
     synth.decay = 22500 * app.pos.x;
     synth.attack = 10000 * app.pos.y;
     synth.resonance = 1;
-    synth.cutoff = 0.8;
 
     var note = [12, 14, 19, 24, 26, 29][app.id];
     synth.note(220 * Math.pow(1.059463094359, note));
 };
 
 var RhythmicFixedRandomMorph = function () {
-    var synth = app.sounds[0];
+    var synth = app.sounds.poly;
     synth.decay = 200;
     synth.attack = 10000 * app.pos.y;
     synth.resonance = 1;
-    synth.cutoff = 0.8;
     synth.amp = 1. - app.pos.x;
 
-    var saw = app.sounds[2];
+    var saw = app.sounds.sawSynth;
     saw.decay = 200;
     saw.attack = 10000 * app.pos.y;
     saw.resonance = 1;
@@ -77,18 +73,104 @@ var RhythmicFixedRandomMorph = function () {
     saw.note(220 * Math.pow(1.059463094359, note));
 };
 
+// nr. 4
+var RhythmicSawNoise = function () {
+  //x : amp, y : attack,
+    var id = app.id % 3;
+
+    switch (id)
+    {
+      case 0:
+      case 1:
+        var synth = (id == 0) ? app.sounds.poly : app.sounds.sawSynth;
+        synth.decay = 200;
+        synth.attack = 10000 * app.pos.y;
+        synth.resonance = 1;
+        synth.cutoff = 0.8;
+        synth.amp = 0.5 * app.pos.x;
+
+        var note = [12, 14, 19, 24, 26, 30][app.id];
+        synth.note(220 * Math.pow(1.059463094359, note));
+      break;
+      case 2:
+        var noise = app.sounds.noise;
+        noise.run();
+      break;
+      default:
+        var noise = app.sounds.noise;
+        noise.run();
+    }
+};
+
+// nr. 5
+// increase or decrease the probability of triggering the note
+// move right to increase the probability of triggering the note
+var RhythmicRandomNote = function () {
+    if (app.pos.x >= Math.random())
+    {
+      var id = app.id % 2;
+      var synth = (id) ? app.sounds.poly : app.sounds.sawSynth;
+
+      synth.decay = 200;
+      synth.attack = 10000 * app.pos.y;
+      synth.resonance = 1;
+      synth.cutoff = 0.8;
+      //synth.amp = 0.5;
+
+      if (id == 0)
+      {
+        // todo: change note sequence
+        var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
+        synth.note(110 * Math.pow(1.059463094359, note));
+      }
+      else
+      {
+        var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
+        synth.note(124.3 * Math.pow(1.059463094359, note));
+      }
+    }
+};
+
+// nr. 6
+// move left & right cutoff, up & down resonance
+var RhythmicRandomNoteCutOff = function () {
+    var id = app.id % 2;
+    var synth = app.sounds.sawSynth;
+
+    synth.decay = 20000;
+    synth.attack = 2000;
+    synth.resonance = 1;
+
+    console.log(app.pos.x)
+    app.soundFx.filter.cutoff = app.pos.x;
+    app.soundFx.filter.resonance = 4 * app.pos.y;
+    //synth.amp = 0.5;
+
+    if (id == 0)
+    {
+      // todo: change note sequence
+      var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
+      synth.note(110 * Math.pow(1.059463094359, note));
+    }
+    else
+    {
+      var note = [12, 14, 19, 33, 30, 31][Math.floor(Math.random() * 6)];
+      synth.note(124.3 * Math.pow(1.059463094359, note));
+    }
+};
+
 var APP = function() {
-  this.sounds = [];
-  this.soundFx = [];
+  this.sounds = {};
+  this.soundFx = {};
 
   this.segments = [];
   this.segments.push(RhythmicDecayAttack);
   this.segments.push(RhythmicDetuneAttack);
   this.segments.push(RhythmicFixedRandom);
   this.segments.push(RhythmicFixedRandomMorph);
-  // this.segments.push();
-  // this.segments.push();
-  // this.segments.push();
+  this.segments.push(RhythmicSawNoise);
+  this.segments.push(RhythmicRandomNote);
+  this.segments.push(RhythmicRandomNoteCutOff);
   // this.segments.push();
   // this.segments.push();
   // this.segments.push();
@@ -152,30 +234,43 @@ var APP = function() {
     app.pos.y = pos.y;
 
     // test sinewaves
-    var s = app.sounds[1];
+    var s = app.sounds.sine;
     s.frequency = 20 + 500 * pos.x;
-    s.amp = 1 - pos.y;
+    s.amp = 0;//1 - pos.y;
 
   }
 
   // SOUNDS
 
-  this.sounds.push(new Gibberish.PolySynth({ attack:88200, decay:88200, maxVoices:10 }).connect());
-  this.sounds.push(new Gibberish.Sine( 440, Add( .5 * this.pos.x)).connect());
+  //sound 0
+  this.sounds.poly = new Gibberish.PolySynth({ attack:88200, decay:88200, maxVoices:10 });
+  this.sounds.poly.connect();
 
-  a = new Gibberish.Synth({ attack:44, decay:44100 }).connect();
-  a.waveform = "Saw";
+  //sound 1
+  this.sounds.sine = new Gibberish.Sine( 440, Add( .5 * this.pos.x));
+  this.sounds.sine.connect();
 
-  this.sounds.push(a);
+  //sound 2
+  this.sounds.sawSynth = new Gibberish.Synth({ attack:44, decay:44100 }).connect();
+  this.sounds.sawSynth.waveform = "Saw";
 
-  this.sounds.push(new Gibberish.Noise(.0).connect());
+  //sound 3
+  adsr = new Gibberish.ADSR(200, 220, 0, 2050, 1, .35, false);
+  synth_test = new Gibberish.Noise(Mul(.5, adsr)).connect();
+  //this.sounds.push(new Gibberish.Noise(Mul(.5, adsr)).connect());
+  this.sounds.noise = adsr;
 
-  //this.sounds.push(new Gibberish.Sine2().connect());
-  this.soundFx.push(new Gibberish.Vibrato({
-    input:this.sounds[0],
+  this.soundFx.vibrato = new Gibberish.Vibrato({
+    input:this.sounds.poly,
     rate:4,
     amount:0.2 // try 100
-  }).connect());
+  });
+  this.soundFx.vibrato.connect();
+
+  // soundFx[1]
+
+  this.soundFx.filter = new Gibberish.Filter24({input:this.sounds.sawSynth, cutoff:.2, resonance:4});
+  this.soundFx.filter.isLowPass = true;
 
   this.playSound = function() {
     var now = app.ts.now();
@@ -188,7 +283,7 @@ var APP = function() {
 
     if(app.pointerDown && app.startTime > 0) {
 
-      app.segments[3]();
+      app.segments[6]();
 
       // show dot somewhere
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
