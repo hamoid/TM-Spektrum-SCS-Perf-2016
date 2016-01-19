@@ -97,12 +97,10 @@ var RhythmicSawNoise = function () {
         synth.note(220 * Math.pow(1.059463094359, note));
       break;
       case 2:
-        var noise = app.sounds.noise;
-        noise.run();
+        app.sounds.noiseAdsr.run();
       break;
       default:
-        var noise = app.sounds.noise;
-        noise.run();
+        app.sounds.noiseAdsr.run();
     }
 };
 
@@ -250,6 +248,8 @@ var APP = function() {
   this.segments.push(RhythmicFixedRandomNoteRingSimple);
   this.segments.push(RhythmicTwoSynthRandomNoteRing);
 
+  this.currentSegmentFunc = function() {};
+
   this.id = Math.floor(Math.random() * 6);
 
   this.pos = {x:0, y:0};
@@ -272,6 +272,12 @@ var APP = function() {
 
   // user interaction
   this.pointerDown = false;
+  this.onPointerDown = function() {
+    app.pointerDown = true;
+  }
+  this.onPointerUp = function() {
+    app.pointerDown = false;
+  }
 
   // sync count
   this.syncCount = 0;
@@ -309,9 +315,9 @@ var APP = function() {
     app.pos.y = pos.y;
 
     // test sinewaves
-    var s = app.sounds.sine;
-    s.frequency = 20 + 500 * pos.x;
-    s.amp = 0;//1 - pos.y;
+    //var s = app.sounds.sine;
+    //s.frequency = 20 + 500 * pos.x;
+    //s.amp = 0;//1 - pos.y;
 
   }
 
@@ -322,19 +328,23 @@ var APP = function() {
   this.sounds.poly.connect();
 
   //sound 1
-  this.sounds.sine = new Gibberish.Sine( 440, Add( .5 * this.pos.x));
-  this.sounds.sine.connect();
+  //this.sounds.sine = new Gibberish.Sine( 440, Add( .5 * this.pos.x));
+  //this.sounds.sine.connect();
 
   //sound 2
   this.sounds.sawSynth = new Gibberish.Synth({ attack:44, decay:44100 }).connect();
   this.sounds.sawSynth.waveform = "Saw";
 
   //sound 3
-  adsr = new Gibberish.ADSR(200, 220, 0, 2050, 1, .35, false);
-  synth_test = new Gibberish.Noise(Mul(.5, adsr)).connect();
-  //this.sounds.push(new Gibberish.Noise(Mul(.5, adsr)).connect());
-  this.sounds.noise = adsr;
+  this.sounds.noiseAdsr = new Gibberish.ADSR(200, 220, 0, 2050, 1, .35, false);
+  this.sounds.noise = new Gibberish.Noise(Mul(.5, this.sounds.noiseAdsr)).connect();
 
+  //sound 4 - (attack, decay, sustain, release,   attackLevel, sustainLevel, requireReleaseTrigger)
+  this.sounds.sinAdsr = new Gibberish.ADSR(200, 220, 0, 2050,  1, 1, true);
+  this.sounds.sinAbe = new Gibberish.Sine(440, this.sounds.sinAdsr).connect();
+  this.sounds.sinAbe.amp = 0;
+
+  //fx 1
   this.soundFx.vibrato = new Gibberish.Vibrato({
     input:this.sounds.poly,
     rate:4,
@@ -346,7 +356,7 @@ var APP = function() {
 
   this.soundFx.ring = new Gibberish.RingModulation({ input:this.sounds.sawSynth, frequency:1000, amp:1., mix:0.0 });
   this.soundFx.ring.connect();
-
+  // ***
 
   this.playSound = function() {
     var now = app.ts.now();
@@ -357,9 +367,10 @@ var APP = function() {
     var segment = Math.floor(timeInScore);
     var normSegmentTime = (timeInScore % 1);
 
-    if(app.pointerDown && app.startTime > 0) {
+    app.currentSegmentFunc = app.segments[segment % app.segments.length];
 
-      app.segments[9]();
+    if(app.pointerDown && normTime > 0 && normTime < 1) {
+      app.currentSegmentFunc();
 
       // show dot somewhere
       app.gfx.stage.children[0].x = Math.random() * window.innerWidth;
@@ -415,12 +426,8 @@ app.gfx.populateStage();
 
 // EVENTS
 // Firefox Linux 64bit issue: 'pointerdown' triggered only once
-$('body').on('pointerdown', function(event) {
-  app.pointerDown = true;
-});
-$('body').on('pointerup pointerout pointerleave', function(event) {
-  app.pointerDown = false;
-});
+$('body').on('pointerdown', app.onPointerDown);
+$('body').on('pointerup pointerout pointerleave', app.onPointerUp);
 $('body').on('keypress', function(event) {
   if(event.which == 115) {
     app.socket.emit('start');
