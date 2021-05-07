@@ -17,3 +17,7 @@ Visit [http://localhost:3000](http://localhost:3000) on Chrome, Chromium (recomm
 Press the 's' key to start the 10 minute performance.
 
 You may now close the console and start having fun :)
+
+---
+
+Archiving because of security vulnerability warnings and I didn't continue working on this project.
